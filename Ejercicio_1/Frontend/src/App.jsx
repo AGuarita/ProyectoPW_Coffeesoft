@@ -1,122 +1,120 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [inputTemp, setInputTemp] = useState('');
+  const [serverMessage, setServerMessage] = useState('');
+  const [history, setHistory] = useState([]);
+  const [isStabilized, setIsStabilized] = useState(false);
+
+  const API_URL = 'http://localhost:5000';
+
+  const handleAdjust = async (e) => {
+    e.preventDefault();
+    if (!inputTemp) return;
+
+    try {
+      const response = await fetch(`${API_URL}/adjust`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ temperatura: Number(inputTemp) }),
+      });
+
+      const data = await response.json();
+      
+      const mensajeServidor = data.mensaje || data.error;
+      setServerMessage(mensajeServidor);
+
+      setHistory((prev) => [
+        { temp: inputTemp, result: mensajeServidor },
+        ...prev,
+      ]);
+
+      if (data.estado === 'EXITO') {
+        setIsStabilized(true);
+      }
+
+      setInputTemp('');
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      setServerMessage('No se pudo conectar con el servidor backend.');
+    }
+  };
+
+  const handleReboot = async () => {
+    try {
+      const response = await fetch(`${API_URL}/reboot`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      setInputTemp('');
+      setServerMessage(data.mensaje || 'Sistema reiniciado.');
+      setHistory([]);
+      setIsStabilized(false);
+    } catch (error) {
+      console.error('Error al reiniciar:', error);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '500px', margin: 'auto' }}>
+      <h2>Estabiliza el Reactor ☢️</h2>
+
+      {!isStabilized ? (
+        <form onSubmit={handleAdjust}>
+          <div>
+            <label>Temperatura (1 - 100): </label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={inputTemp}
+              onChange={(e) => setInputTemp(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" style={{ marginTop: '10px' }}>
+            Ajustar Temperatura
+          </button>
+        </form>
+      ) : (
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+          <h3 style={{ color: 'green' }}>🎉 ¡Reactor Estabilizado Correctamente! 🎉</h3>
+          <button onClick={handleReboot}>Reiniciar Sistema</button>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+      )}
+
+      {serverMessage && (
+        <div style={{ marginTop: '15px', padding: '10px', background: '#eef', borderRadius: '5px' }}>
+          <strong>Respuesta del servidor:</strong> {serverMessage}
+        </div>
+      )}
+
+      <div style={{ marginTop: '20px' }}>
+        <h3>Historial de Intentos</h3>
+        {history.length === 0 ? (
+          <p>No hay registro de intentos aún.</p>
+        ) : (
+          <ul>
+            {history.map((item, index) => (
+              <li key={index}>
+                Intento: <strong>{item.temp}</strong> — Mensaje: <em>{item.result}</em>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {!isStabilized && history.length > 0 && (
+        <button onClick={handleReboot} style={{ marginTop: '20px', background: '#ffcccc' }}>
+          Reiniciar Partida
         </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
