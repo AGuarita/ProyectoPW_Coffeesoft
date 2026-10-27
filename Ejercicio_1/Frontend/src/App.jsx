@@ -61,7 +61,7 @@ function App() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '500px', margin: 'auto' }}>
-      <h2>Estabiliza el Reactor ☢️</h2>
+      <h2>Estabiliza el Reactor</h2>
 
       {!isStabilized ? (
         <form onSubmit={handleAdjust}>
@@ -82,7 +82,7 @@ function App() {
         </form>
       ) : (
         <div>
-          <h3 style={{ color: 'green' }}>🎉 ¡Reactor Estabilizado Correctamente! 🎉</h3>
+          <h3 style={{ color: 'green' }}>¡Reactor Estabilizado Correctamente! </h3>
           <button onClick={handleReboot}>Reiniciar Sistema</button>
         </div>
       )}
