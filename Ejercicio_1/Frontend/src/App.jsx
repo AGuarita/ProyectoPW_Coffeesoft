@@ -60,8 +60,8 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '500px', margin: 'auto' }}>
-      <h2>Estabiliza el Reactor</h2>
+    <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '1500px', margin: 'auto'}}>
+      <h1>Estabiliza el Reactor</h1>
 
       {!isStabilized ? (
         <form onSubmit={handleAdjust}>
